@@ -1,0 +1,9 @@
+{
+  "name": "user-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Demo User Service for DevOps CI/CD assignment",
+  "scripts": {
+    "start": "node app.js"
+  }
+}
