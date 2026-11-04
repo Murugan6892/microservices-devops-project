@@ -56,7 +56,7 @@ pipeline {
                 sh '''
                     set -e
 
-                    docker build -t user-service:${BUILD_NUMBER} ./user-service
+                    sudo docker build -t user-service:${BUILD_NUMBER} ./user-service
 
                     docker build -t product-service:${BUILD_NUMBER} ./product-service
 
