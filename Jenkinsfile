@@ -1,3 +1,4 @@
+
 pipeline {
 
     agent any
@@ -88,19 +89,19 @@ pipeline {
                     $class: 'AmazonWebServicesCredentialsBinding',
                     credentialsId: 'aws-cred'
                 ]]) {
-                   sh '''
-                       set -e
+                    sh '''
+                        set -e
 
-                       aws ecr get-login-password \
-                       --region us-east-2 | \
-                       docker login \
-                       --username AWS \
-                       --password-stdin 372951851936.dkr.ecr.us-east-2.amazonaws.com
-                   '''
-              }
-          }
+                        aws ecr get-login-password \
+                        --region ${AWS_REGION} | \
+                        docker login \
+                        --username AWS \
+                        --password-stdin ${ECR_REGISTRY}
+                    '''
+                }
+            }
         }
-        
+
         stage('Push Images to ECR') {
             steps {
                 sh '''
@@ -119,6 +120,8 @@ pipeline {
             steps {
                 sshagent(credentials: ['ec2-ssh-key']) {
                     sh '''
+                        set -e
+
                         ssh -o StrictHostKeyChecking=accept-new \
                         ${EC2_USER}@${EC2_HOST} \
                         "cd ${DEPLOY_DIR} && \
@@ -136,7 +139,10 @@ pipeline {
             steps {
                 sshagent(credentials: ['ec2-ssh-key']) {
                     sh '''
-                        ssh ${EC2_USER}@${EC2_HOST} \
+                        set -e
+
+                        ssh -o StrictHostKeyChecking=accept-new \
+                        ${EC2_USER}@${EC2_HOST} \
                         "cd ${DEPLOY_DIR} && \
                         docker compose ps"
                     '''
