@@ -100,18 +100,7 @@ pipeline {
               }
           }
         }
-        stage('Login to Amazon ECR') {
-            steps {
-                sh '''
-                    aws ecr get-login-password \
-                    --region ${AWS_REGION} |
-                    docker login \
-                    --username AWS \
-                    --password-stdin ${ECR_REGISTRY}
-                '''
-            }
-        }
-
+        
         stage('Push Images to ECR') {
             steps {
                 sh '''
