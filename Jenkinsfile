@@ -38,7 +38,7 @@ pipeline {
                     set -e
 
                     test -f docker-compose.yml
-                    test -f nginx/nginx.conf
+                    test -f nginx/default.conf
 
                     test -f user-service/Dockerfile
                     test -f product-service/Dockerfile
