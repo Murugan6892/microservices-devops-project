@@ -116,6 +116,44 @@ pipeline {
             }
         }
 
+        // Keep only latest 3 local Docker images on Jenkins server
+
+        stage('Docker Image Cleanup') {
+            steps {
+                sh '''
+                    set -e
+
+                    echo "Starting local Docker image cleanup..."
+
+                    for IMAGE in user-service product-service order-service
+                    do
+                        echo "Processing $IMAGE"
+
+                        IMAGES=$(docker images \
+                            --format '{{.Tag}}' "$IMAGE" \
+                            | grep -E '^[0-9]+$' \
+                            | sort -nr \
+                            | tail -n +4 || true)
+
+                        for TAG in $IMAGES
+                        do
+                            echo "Deleting old image: $IMAGE:$TAG"
+
+                            docker rmi "$IMAGE:$TAG" || true
+                        done
+                    done
+
+                    echo "Cleanup completed successfully"
+
+                    echo "Remaining local application images:"
+
+                    docker images user-service
+                    docker images product-service
+                    docker images order-service
+                '''
+            }
+        }
+
         stage('Deploy to EC2') {
             steps {
                 sshagent(credentials: ['ec2-ssh-key']) {
