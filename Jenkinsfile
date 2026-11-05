@@ -116,8 +116,6 @@ pipeline {
             }
         }
 
-        // Keep only latest 3 local Docker images on Jenkins server
-
         stage('Docker Image Cleanup') {
             steps {
                 sh '''
@@ -129,27 +127,34 @@ pipeline {
                     do
                         echo "Processing $IMAGE"
 
-                        IMAGES=$(docker images \
+                        # Find all numeric tags and keep latest 3
+                        OLD_TAGS=$(docker images \
                             --format '{{.Tag}}' "$IMAGE" \
                             | grep -E '^[0-9]+$' \
                             | sort -nr \
                             | tail -n +4 || true)
 
-                        for TAG in $IMAGES
+                        for TAG in $OLD_TAGS
                         do
                             echo "Deleting old image: $IMAGE:$TAG"
 
+                            # Remove local image tag
                             docker rmi "$IMAGE:$TAG" || true
+
+                            # Remove ECR-prefixed local image tag
+                            docker rmi "${ECR_REGISTRY}/${IMAGE}:${TAG}" || true
                         done
                     done
 
-                    echo "Cleanup completed successfully"
+                    echo "Docker image cleanup completed!"
 
-                    echo "Remaining local application images:"
+                    echo "Remaining application images:"
 
-                    docker images user-service
-                    docker images product-service
-                    docker images order-service
+                    docker images | grep -E 'user-service|product-service|order-service' || true
+
+                    echo "Docker disk usage:"
+
+                    docker system df
                 '''
             }
         }
