@@ -151,7 +151,7 @@ pipeline {
 
         stage('Deploy to EC2') {
             steps {
-                sshagent(credentials: ['deployment-ssh']) {
+                sshagent(credentials: ['ec2-ssh-key']) {
                     sh '''
                         set -e
 
