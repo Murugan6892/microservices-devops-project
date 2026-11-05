@@ -13,7 +13,8 @@ pipeline {
         PRODUCT_IMAGE = 'product-service'
         ORDER_IMAGE = 'order-service'
 
-        EC2_HOST = '18.223.133.122'
+        // Deployment EC2 private IP
+        EC2_HOST = '172.31.43.89'
         EC2_USER = 'ubuntu'
 
         DEPLOY_DIR = '/home/ubuntu/microservices-devops-project'
@@ -58,9 +59,7 @@ pipeline {
                     set -e
 
                     docker build -t user-service:${BUILD_NUMBER} ./user-service
-
                     docker build -t product-service:${BUILD_NUMBER} ./product-service
-
                     docker build -t order-service:${BUILD_NUMBER} ./order-service
                 '''
             }
@@ -108,9 +107,7 @@ pipeline {
                     set -e
 
                     docker push ${ECR_REGISTRY}/${USER_IMAGE}:${BUILD_NUMBER}
-
                     docker push ${ECR_REGISTRY}/${PRODUCT_IMAGE}:${BUILD_NUMBER}
-
                     docker push ${ECR_REGISTRY}/${ORDER_IMAGE}:${BUILD_NUMBER}
                 '''
             }
@@ -127,7 +124,6 @@ pipeline {
                     do
                         echo "Processing $IMAGE"
 
-                        # Find all numeric tags and keep latest 3
                         OLD_TAGS=$(docker images \
                             --format '{{.Tag}}' "$IMAGE" \
                             | grep -E '^[0-9]+$' \
@@ -138,21 +134,15 @@ pipeline {
                         do
                             echo "Deleting old image: $IMAGE:$TAG"
 
-                            # Remove local image tag
                             docker rmi "$IMAGE:$TAG" || true
 
-                            # Remove ECR-prefixed local image tag
                             docker rmi "${ECR_REGISTRY}/${IMAGE}:${TAG}" || true
                         done
                     done
 
                     echo "Docker image cleanup completed!"
 
-                    echo "Remaining application images:"
-
                     docker images | grep -E 'user-service|product-service|order-service' || true
-
-                    echo "Docker disk usage:"
 
                     docker system df
                 '''
@@ -161,7 +151,7 @@ pipeline {
 
         stage('Deploy to EC2') {
             steps {
-                sshagent(credentials: ['ec2-ssh-key']) {
+                sshagent(credentials: ['deployment-ssh']) {
                     sh '''
                         set -e
 
@@ -180,7 +170,7 @@ pipeline {
 
         stage('Health Check') {
             steps {
-                sshagent(credentials: ['ec2-ssh-key']) {
+                sshagent(credentials: ['deployment-ssh']) {
                     sh '''
                         set -e
 
