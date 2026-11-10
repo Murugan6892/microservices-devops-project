@@ -170,13 +170,16 @@ pipeline {
 
         stage('Health Check') {
             steps {
-                sshagent(credentials: ['deployment-ssh']) {
+                sshagent(credentials: ['ec2-ssh-key']) {
                     sh '''
                         set -e
 
                         ssh -o StrictHostKeyChecking=accept-new \
                         ${EC2_USER}@${EC2_HOST} \
                         "cd ${DEPLOY_DIR} && \
+                        export USER_IMAGE=${ECR_REGISTRY}/${USER_IMAGE}:${BUILD_NUMBER} && \
+                        export PRODUCT_IMAGE=${ECR_REGISTRY}/${PRODUCT_IMAGE}:${BUILD_NUMBER} && \
+                        export ORDER_IMAGE=${ECR_REGISTRY}/${ORDER_IMAGE}:${BUILD_NUMBER} && \
                         docker compose ps"
                     '''
                 }
