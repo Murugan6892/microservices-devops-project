@@ -1,7 +1,7 @@
+
 services:
   user-service:
-    build: ./user-service
-    image: user-service:1.0
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/user-service:${IMAGE_TAG}
     restart: unless-stopped
     environment:
       PORT: "3001"
@@ -15,8 +15,7 @@ services:
       retries: 3
 
   product-service:
-    build: ./product-service
-    image: product-service:1.0
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/product-service:${IMAGE_TAG}
     restart: unless-stopped
     environment:
       PORT: "3002"
@@ -30,8 +29,7 @@ services:
       retries: 3
 
   order-service:
-    build: ./order-service
-    image: order-service:1.0
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/order-service:${IMAGE_TAG}
     restart: unless-stopped
     environment:
       PORT: "3003"
