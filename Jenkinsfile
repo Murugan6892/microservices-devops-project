@@ -14,7 +14,7 @@ pipeline {
         ORDER_IMAGE = 'order-service'
 
         // Deployment EC2 private IP
-        EC2_HOST = '172.31.43.89'
+        EC2_HOST = '172.31.36.163'
         EC2_USER = 'ubuntu'
 
         DEPLOY_DIR = '/home/ubuntu/microservices-devops-project'
